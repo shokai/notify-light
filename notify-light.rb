@@ -42,9 +42,9 @@ loop do
   end
   puts "light : #{avg}"
   if avg >= params[:threshold].to_f and !lighting
-    lighting = true if notify '明る〜い'
+    lighting = true if notify "明る〜い (#{avg})"
   elsif avg < params[:threshold].to_f and lighting
-    lighting = false  if notify '暗い・・'
+    lighting = false  if notify "暗い・・ (#{avg})"
   end
   sleep params[:interval].to_i
 end
