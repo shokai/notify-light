@@ -10,6 +10,7 @@ parser.comment(:skype, 'URL of Skype Chat Gateway', 'http://localhost:8787/')
 parser.comment(:light, 'URL of Serial HTTP Gateway', 'http://localhost:8783/')
 parser.comment(:interval, 'loop interval (sec)', 10)
 parser.comment(:threshold, 'threshold of light', 0.03)
+parser.bind(:help, :h, 'show help')
 
 first, params = parser.parse ARGV
 
