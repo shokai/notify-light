@@ -9,7 +9,8 @@ parser = ArgsParser.parser
 parser.comment(:skype, 'URL of Skype Chat Gateway', 'http://localhost:8787/')
 parser.comment(:light, 'URL of Serial HTTP Gateway', 'http://localhost:8783/')
 parser.comment(:interval, 'loop interval (sec)', 10)
-parser.comment(:threshold, 'threshold of light', 0.03)
+parser.comment(:threshold_light, 'threshold of light', 0.02)
+parser.comment(:threshold_sun, 'threshold of sun', 0.3)
 parser.bind(:help, :h, 'show help')
 
 first, params = parser.parse ARGV
@@ -20,10 +21,9 @@ if parser.has_option(:help) or !parser.has_params([:skype, :light])
   exit 1
 end
 
-lighting = false
 @skype = params[:skype]
-
 def notify(msg)
+  puts msg
   uri = URI.parse @skype
   Net::HTTP.start(uri.host, uri.port) do |http|
     res = http.post(uri.path, msg)
@@ -31,6 +31,9 @@ def notify(msg)
   end
   false
 end
+
+# STATS = [:sun, :light, :dark]
+stat = nil
 
 loop do
   begin
@@ -42,10 +45,18 @@ loop do
     next
   end
   puts "light : #{avg}"
-  if avg >= params[:threshold].to_f and !lighting
-    lighting = true if notify "明る〜い (#{avg})"
-  elsif avg < params[:threshold].to_f and lighting
-    lighting = false  if notify "暗い・・ (#{avg})"
+  if avg > params[:threshold_sun].to_f
+    if stat != :sun
+      stat = :sun if notify "太陽がでてる (#{avg})"
+    end
+  elsif avg > params[:threshold_light].to_f
+    if stat != :light
+      stat = :light if notify "電気ついてる (#{avg})"
+    end
+  else
+    if stat != :dark
+      stat = :dark if notify "暗い・・ (#{avg})"
+    end
   end
   sleep params[:interval].to_i
 end
